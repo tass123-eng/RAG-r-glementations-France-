@@ -1,0 +1,558 @@
+# ============================================================
+# Urbanisme RAG AI
+# PLU + Réglementation Nationale
+# OCR Vision + Embeddings + Hybrid Search + Agents
+# ============================================================
+
+
+project:
+  name: "PLU_RAG_AI"
+  version: "1.0.0"
+
+
+
+# ============================================================
+# PATHS
+# ============================================================
+
+paths:
+
+  data_dir: "./data"
+
+  raw_dir: "./data/raw"
+
+  processed_dir: "./data/processed"
+
+  chunks_dir: "./data/chunks"
+
+  vector_dir: "./data/vectorstore"
+
+  logs_dir: "./logs"
+
+
+
+# ============================================================
+# MUNICIPALITIES
+# ============================================================
+
+
+municipalities:
+
+
+  - name: "Nantes"
+
+    department: "Loire-Atlantique"
+
+    region: "Pays de la Loire"
+
+    code_insee: "44109"
+
+
+    plu:
+
+      enabled: true
+
+
+      source:
+
+        name: "Geoportail Urbanisme"
+
+        url: "https://www.geoportail-urbanisme.gouv.fr"
+
+
+
+      documents:
+
+        - "PLU métropole Nantes"
+
+        - "Règlement écrit"
+
+        - "Plan de zonage"
+
+        - "OAP"
+
+        - "Servitudes"
+
+
+
+  - name: "Mormant"
+
+    department: "Seine-et-Marne"
+
+    region: "Île-de-France"
+
+    code_insee: "77317"
+
+
+    plu:
+
+      enabled: true
+
+
+      source:
+
+        name: "Geoportail Urbanisme"
+
+        url: "https://www.geoportail-urbanisme.gouv.fr"
+
+
+
+      documents:
+
+        - "PLU Mormant"
+
+        - "Règlement écrit"
+
+        - "Plan de zonage"
+
+        - "Servitudes"
+
+
+
+# ============================================================
+# GEO SERVICES
+# ============================================================
+
+
+geo:
+
+
+  ban:
+
+    enabled: true
+
+    endpoint:
+
+      "https://api-adresse.data.gouv.fr/search/"
+
+
+
+  cadastre:
+
+    enabled: true
+
+    endpoint:
+
+      "https://apicarto.ign.fr/api/cadastre"
+
+
+
+# ============================================================
+# OCR
+# ============================================================
+
+
+ocr:
+
+
+  provider: "mistral"
+
+
+  model:
+
+    "mistral-ocr-latest"
+
+
+
+  language:
+
+    - fr
+
+
+
+  extract:
+
+    text: true
+
+    tables: true
+
+    images: true
+
+    layout: true
+
+
+
+  output:
+
+    format: "markdown"
+
+
+
+# ============================================================
+# CHUNKING
+# ============================================================
+
+
+chunking:
+
+
+  strategy: "semantic"
+
+
+  chunk_size: 800
+
+
+  chunk_overlap: 150
+
+
+
+# ============================================================
+# EMBEDDINGS
+# ============================================================
+
+
+embeddings:
+
+
+  provider: "mistral"
+
+
+  model: "mistral-embed"
+
+
+  dimension: 1024
+
+
+
+# ============================================================
+# VECTOR DATABASE
+# ============================================================
+
+
+vectorstore:
+
+
+  provider: "chroma"
+
+
+  persist_directory:
+
+    "./data/vectorstore"
+
+
+
+  collections:
+
+
+    plu:
+
+      "plu_documents"
+
+
+
+    national:
+
+      "national_regulations"
+
+
+
+    cadastre:
+
+      "cadastre_documents"
+
+
+
+# ============================================================
+# NATIONAL REGULATIONS
+# ============================================================
+
+
+national_sources:
+
+
+  - name: "Code de l'urbanisme"
+
+    tag: "urbanisme"
+
+    type: "legifrance"
+
+    enabled: true
+
+
+
+  - name: "Code construction habitation"
+
+    tag: "construction"
+
+    type: "legifrance"
+
+    enabled: true
+
+
+
+  - name: "RE2020"
+
+    tag: "re2020"
+
+    type: "pdf"
+
+    enabled: true
+
+
+
+  - name: "ERP"
+
+    tag: "erp"
+
+    type: "pdf"
+
+    enabled: true
+
+
+
+  - name: "Accessibilité PMR"
+
+    tag: "accessibilite"
+
+    type: "pdf"
+
+    enabled: true
+
+
+
+  - name: "Sécurité incendie"
+
+    tag: "incendie"
+
+    type: "pdf"
+
+    enabled: true
+
+
+
+  - name: "DTU"
+
+    tag: "dtu"
+
+    type: "external"
+
+    enabled: false
+
+
+
+  - name: "Eurocodes"
+
+    tag: "eurocodes"
+
+    type: "external"
+
+    enabled: false
+
+
+
+
+# ============================================================
+# HYBRID SEARCH
+# ============================================================
+
+
+search:
+
+
+  vector:
+
+    enabled: true
+
+    top_k: 30
+
+
+
+  bm25:
+
+    enabled: true
+
+    top_k: 30
+
+
+
+  rrf:
+
+
+    enabled: true
+
+    k: 60
+
+
+
+  reranking:
+
+
+    enabled: true
+
+
+    model:
+
+      "BAAI/bge-reranker-v2-m3"
+
+
+
+    device:
+
+      "cuda"
+
+
+
+    batch_size:
+
+      32
+
+
+
+    final_top_k:
+
+      10
+
+
+
+
+# ============================================================
+# LLM
+# ============================================================
+
+
+llm:
+
+
+  provider:
+
+    "mistral"
+
+
+
+  model:
+
+    "mistral-large-latest"
+
+
+
+  temperature:
+
+    0.1
+
+
+
+  max_tokens:
+
+    2000
+
+
+
+
+# ============================================================
+# AGENTS
+# ============================================================
+
+
+agents:
+
+
+  plu:
+
+
+    enabled: true
+
+
+    collection:
+
+      "plu_documents"
+
+
+
+  national:
+
+
+    enabled: true
+
+
+    collection:
+
+      "national_regulations"
+
+
+
+  parcelle:
+
+
+    enabled: true
+
+
+    workflow:
+
+
+      - address_resolution
+
+      - ban_lookup
+
+      - cadastre_lookup
+
+      - plu_search
+
+      - national_search
+
+      - reranking
+
+      - synthesis
+
+
+
+# ============================================================
+# API
+# ============================================================
+
+
+api:
+
+
+  host:
+
+    "0.0.0.0"
+
+
+  port:
+
+    8000
+
+
+
+# ============================================================
+# STREAMLIT
+# ============================================================
+
+
+streamlit:
+
+
+  title:
+
+    "Assistant IA Urbanisme - PLU"
+
+
+
+  modes:
+
+    - "RAG Général"
+
+    - "Agent PLU"
+
+    - "Agent National"
+
+    - "Agent Parcelle"
+
+
+
+# ============================================================
+# LOGGING
+# ============================================================
+
+
+logging:
+
+
+  level:
+
+    "INFO"
+
+
+  file:
+
+    "./logs/app.log"

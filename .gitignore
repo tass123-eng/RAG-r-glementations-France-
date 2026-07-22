@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+data/raw/*
+data/processed/*
+data/images/*
+data/chunks/*
+data/vector_db/*
+logs/*.log
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/images/.gitkeep
+!data/chunks/.gitkeep
+!data/vector_db/.gitkeep
